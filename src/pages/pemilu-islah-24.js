@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import Select from "react-select";
 import Amplify, { Auth, API } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import awsconfig from './aws-exports';
+import awsconfig from '../data/aws-exports'
 import SEO from "../components/seo"
 import { groupedOptions } from "../data/santri"
 import signUp from "../functions/signup"
