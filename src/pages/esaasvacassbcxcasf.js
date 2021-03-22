@@ -14,43 +14,43 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 Amplify.configure(awsconfig);
 
 
-async function postData(data) {
-    const apiName = 'api66db2874';
-    const path = '/coblos';
-    const myInit = { // OPTIONAL
-        body: data, // replace this with attributes you need
-        headers: {}, // OPTIONAL
-    };
-
-    return await API.post(apiName, path, myInit);
-}
-
-
-
 class Hasil extends React.Component {
     constructor(props) {
         super(props)
-        this.state = { data: "" }
+        this.state = { data: [] }
     }
 
     componentDidMount() {
         API
             .get("api66db2874", "/coblos", {})
             .then(response => {
-                console.log(response)
-                this.setState({ data: response })
+                console.log({ response: response })
+                let pilihan = []
+                for (const iterator of response) {
+                    if (pilihan.filter(nama => Object.keys(nama)[0] === iterator.memilih).length === 0) {
+                        const a = {}
+                        a[iterator.memilih] = 1
+                        pilihan.push(a)
+                    } else {
+                        pilihan.filter(nama => Object.keys(nama)[0] === iterator.memilih)[0][iterator.memilih] += 1
+                    }
+                }
+                this.setState({ data: pilihan })
             })
             .catch(error => {
                 console.log(error.response);
             });
     }
+
     render() {
-    return (
-        <>
-        {this.state.data}
-        </>
-    )
-}
+        return (
+            <>
+                {this.state.data.map(datum => (
+                    <li>{Object.keys(datum)[0]} {Object.values(datum)[0]}</li>
+                ))}
+            </>
+        )
+    }
 }
 
 export default Hasil

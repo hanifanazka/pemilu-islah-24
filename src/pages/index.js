@@ -1,90 +1,118 @@
 import * as React from "react"
-
+import PropTypes from 'prop-types';
+import { Formik, Form, Field } from 'formik';
+import Select from "react-select";
+import Amplify, { Auth, API } from 'aws-amplify';
+import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
+import awsconfig from '../data/aws-exports'
 import SEO from "../components/seo"
+import { groupedOptions } from "../data/santri"
+import signUp from "../functions/signup"
+import { SelectField } from "../components/selectfield"
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const IndexPage = () => (
-  <>
-    <SEO title="Home" />
-    <div class="container wd-xl-40p wd-lg-40p ws-md-70p wd-sm-100p wd-xs-100p">
-      <div class="card">
-        <div class="card-header">
-          <div class="logo-container tx-center mb-2">
-            <img src="https://portal.ltmpt.ac.id/assets/media/img/logo.png" class="img-fluid" alt="LTMPT" />
+import wt from "../images/wt.png"
+import mutazam from "../images/mutazam.png"
+import bacol from "../images/bacol.png"
+import piscool from "../images/piscool.png"
+import barok from "../images/barok.png"
+
+Amplify.configure(awsconfig);
+
+
+class Candidate extends React.Component {
+  camelCase(str) {
+    if (str) {
+      return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+      }).replace(/\s+/g, '');
+    }
+  }
+
+  render() {
+    return (
+      <div className="col-lg-4 col-sm-6">
+        <div className={this.props.memilih === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
+          <img className="card-img-top" src={this.props.img} />
+          <div className="card-body">
+            <div className="form-check">
+              <Field type="radio" name="memilih" value={this.props.name} className="form-check-input" />
+              <label className="form-check-label">{this.props.name}</label>
+            </div >
           </div>
-          <div class="tx-center tx-medium tx-xs-16 tx-sm-22 tx-md-24">Selamat Datang di Portal LTMPT</div>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <p class="text-justify">Masukkan kombinasi <strong>email</strong> dan <strong>password</strong> yang telah terdaftar untuk masuk ke portal LTMPT. Jika belum memiliki akun LTMPT, silahkan melakukan registrasi akun LTMPT. <a href="https://portal.ltmpt.ac.id/reg">Daftar di sini</a>.</p>
-            </div>
-          </div>
-          <form id="form-login" method="post" action="https://portal.ltmpt.ac.id/login" autocomplete="off">
-            <div class="form-group mb-3">
-              <label>Email</label>
-              <div class="input-group">
-                <input id="username" type="text" class="form-control form-control-lg" required="" autocomplete="off" />
-                <span class="input-group-append">
-                  <span class="input-group-text">
-                    <i class="fas fa-at"></i>
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            <div class="form-group mb-3">
-              <div class="clearfix">
-                <label class="float-left">Password</label>
-              </div>
-              <div class="input-group">
-                <input id="password" type="password" class="form-control form-control-lg" required="" />
-                <span class="input-group-append">
-                  <span class="input-group-text">
-                    <i class="fas fa-lock"></i>
-                  </span>
-                </span>
-              </div>
-            </div>
-
-
-            <input type="hidden" id="pubkey" value="-----BEGIN PUBLIC KEY-----
-                                    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC89DZ+PsgXBgoXLtlvnRrnNuRy
-                                    R+wvjG8gYyLYASisYowc+ucrKOiodR0EPpM6p3fY/u344JFaJgu/uGTwClXtNS7R
-                                    EMZ5wNN8TbLJgCKNbU8DZmXMImNDc2JOfHLdG5Y8LFJv9krwlOirXSrneHUuIvZe
-                                    rbS+jb1NL0HkvaCuJQIDAQAB
-                                    -----END PUBLIC KEY-----"/>
-            <input type="hidden" name="content" value="" id="encrypted" />
-
-            <input type="hidden" name="client_id" value="89DB8BD0-EA96-44AF-A6C3-3C50EA05F8A5" />
-            <input type="hidden" name="response_type" value="code" />
-            <input type="hidden" name="scope" value="openid profile email phone group" />
-            <input type="hidden" name="state" value="e705ab3231da558dcd39fd2e40700c6d" />
-            <input type="hidden" name="prompt" value="" />
-            <input type="hidden" name="redirect_uri" value="https://portal.ltmpt.ac.id/sso/auth" />
-            <input type="hidden" name="nonce" value="b743e47850b1f8bc975d0544fb6eaff8" />
-
-            <div class="row">
-              <div class="col">
-                <a href="https://portal.ltmpt.ac.id/sso/forgot-password">Lupa Password?</a>
-              </div>
-            </div>
-
-            <div class="row mt-3">
-              <div class="col text-right">
-                <button id="btn-login" type="submit" class="btn btn-primary btn-block mt-2">Masuk</button>
-              </div>
-            </div>
-
-          </form>
-        </div>
-        <div class="card-footer tx-center">
-          <img src="https://portal.ltmpt.ac.id/assets/media/img/sponsor.png" class="img-fluid" alt="Sponsor" />
         </div>
       </div>
+    );
+  }
+}
+
+Candidate.propTypes = {
+  name: PropTypes.string.isRequired
+}
+
+async function postData(data) {
+  const apiName = 'api66db2874';
+  const path = '/coblos';
+  const myInit = { // OPTIONAL
+    body: data, // replace this with attributes you need
+    headers: {}, // OPTIONAL
+  };
+
+  return await API.post(apiName, path, myInit);
+}
+
+const Card = ({ children }) => (
+  <div className="container py-3">
+    <div className="card">
+      <div className="card-body">
+        {children}
+      </div>
     </div>
+  </div>
+)
+
+const Pemilu = () => (
+  <>
+    <Formik
+      initialValues={{
+        memilih: '',
+        pemilih: ""
+      }}
+      onSubmit={(values) => {
+        postData({
+          pemilih: values.pemilih,
+          memilih: values.memilih
+        })
+      }}
+    >
+      {({ values, isSubmitting, handleChange, handleBlur }) => (
+        <Form>
+          <Card>
+            <div className="form-group">
+              <h5 className="card-title">Nama Lengkap</h5>
+              {/* <Select isSearchable={true} placeholder="🔍 Cari" name="pemilih" options={groupedOptions} onChange={handleChange} onBlur={handleBlur} value={values.pemilih} inputValue={values.pemilih} /> */}
+              <Field name="pemilih" component={SelectField} options={groupedOptions} />
+            </div>
+          </Card>
+          <Card>
+            <div className="form-group">
+              <h5 className="card-title">Coblos Ketua Islah 24!</h5>
+              <div className="form-row">
+                <Candidate picked={values.memilih} name="Wildan Taupiqur Rahman Chudory" img={wt} />
+                <Candidate picked={values.memilih} name="Mu`tazamullah Al Faris" img={mutazam} />
+                <Candidate picked={values.memilih} name="M. Fathan Zaki Mubarok" img={barok} />
+                <Candidate picked={values.memilih} name="Muhammad Hafiz" img={piscool} />
+                <Candidate picked={values.memilih} name="Muhammad Fathin Fadhlullah A" img={bacol} />
+              </div>
+              <div>Pemilih: {values.pemilih}</div>
+              <div>Picked: {values.memilih}</div>
+              <button type="submit" className="btn btn-primary d-block" disabled={isSubmitting}>Simpan permanen</button>
+            </div>
+          </Card>
+        </Form>)}
+    </Formik>
   </>
 )
 
-export default IndexPage
+export default Pemilu
