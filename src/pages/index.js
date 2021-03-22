@@ -33,8 +33,9 @@ class Candidate extends React.Component {
   render() {
     return (
       <div className="col-lg-4 col-sm-6">
-        <div className={this.props.memilih === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
-          <img className="card-img-top" src={this.props.img} />
+        <div className={this.props.terpilih === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
+          <div className="card-header h3 font-weight-bold text-center">{this.props.norut}</div>
+          <img src={this.props.img} />
           <div className="card-body">
             <div className="form-check">
               <Field type="radio" name="memilih" value={this.props.name} className="form-check-input" />
@@ -51,17 +52,6 @@ Candidate.propTypes = {
   name: PropTypes.string.isRequired
 }
 
-async function postData(data) {
-  const apiName = 'api66db2874';
-  const path = '/coblos';
-  const myInit = { // OPTIONAL
-    body: data, // replace this with attributes you need
-    headers: {}, // OPTIONAL
-  };
-
-  return await API.post(apiName, path, myInit);
-}
-
 const Card = ({ children }) => (
   <div className="container py-3">
     <div className="card">
@@ -72,47 +62,97 @@ const Card = ({ children }) => (
   </div>
 )
 
-const Pemilu = () => (
-  <>
-    <Formik
-      initialValues={{
-        memilih: '',
-        pemilih: ""
-      }}
-      onSubmit={(values) => {
-        postData({
-          pemilih: values.pemilih,
-          memilih: values.memilih
-        })
-      }}
-    >
-      {({ values, isSubmitting, handleChange, handleBlur }) => (
-        <Form>
-          <Card>
-            <div className="form-group">
-              <h5 className="card-title">Nama Lengkap</h5>
-              {/* <Select isSearchable={true} placeholder="🔍 Cari" name="pemilih" options={groupedOptions} onChange={handleChange} onBlur={handleBlur} value={values.pemilih} inputValue={values.pemilih} /> */}
-              <Field name="pemilih" component={SelectField} options={groupedOptions} />
-            </div>
-          </Card>
-          <Card>
-            <div className="form-group">
-              <h5 className="card-title">Coblos Ketua Islah 24!</h5>
-              <div className="form-row">
-                <Candidate picked={values.memilih} name="Wildan Taupiqur Rahman Chudory" img={wt} />
-                <Candidate picked={values.memilih} name="Mu`tazamullah Al Faris" img={mutazam} />
-                <Candidate picked={values.memilih} name="M. Fathan Zaki Mubarok" img={barok} />
-                <Candidate picked={values.memilih} name="Muhammad Hafiz" img={piscool} />
-                <Candidate picked={values.memilih} name="Muhammad Fathin Fadhlullah A" img={bacol} />
-              </div>
-              <div>Pemilih: {values.pemilih}</div>
-              <div>Picked: {values.memilih}</div>
-              <button type="submit" className="btn btn-primary d-block" disabled={isSubmitting}>Simpan permanen</button>
-            </div>
-          </Card>
-        </Form>)}
-    </Formik>
-  </>
-)
+class Pemilu extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      successSubmitted: false,
+      alreadySubmitted: false
+    }
+  }
+
+  render() {
+    return (
+      <>
+        <Formik
+          initialValues={{
+            memilih: '',
+            pemilih: ""
+          }}
+          onSubmit={(values, actions) => {
+            const apiName = 'api66db2874';
+            const path = '/coblos';
+            const data = {
+              pemilih: values.pemilih,
+              memilih: values.memilih
+            }
+            const myInit = { body: data };
+            API.get(apiName, path + "/" + data.pemilih, myInit)
+              .then(response => {
+                if (!response) {
+                  API.post(apiName, path, myInit)
+                    .then(response => {
+                      console.log(response)
+                      actions.setSubmitting(false)
+                      this.setState({ successSubmitted: true })
+                    })
+                    .catch(error => {
+                      console.error(error.response)
+                      actions.setSubmitting(false)
+                    })
+                } else {
+                  actions.setSubmitting(false)
+                  this.setState({ alreadySubmitted: true })
+                }
+              })
+              .catch(error => {
+                console.error(error.response)
+                actions.setSubmitting(false)
+              })
+          }}
+        >
+          {({ values, isSubmitting, submitCount }) => (
+            <Form>
+              <Card>
+                <div className="form-group">
+                  <h5 className="card-title">Nama Lengkap</h5>
+                  {/* <Select isSearchable={true} placeholder="🔍 Cari" name="pemilih" options={groupedOptions} onChange={handleChange} onBlur={handleBlur} value={values.pemilih} inputValue={values.pemilih} /> */}
+                  <Field name="pemilih" component={SelectField} options={groupedOptions} />
+                </div>
+              </Card>
+              <Card>
+                <div className="form-group">
+                  <h5 className="card-title">Coblos Ketua Islah 24!</h5>
+                  <div className="form-row">
+                    <Candidate terpilih={values.memilih} norut="1" name="Wildan Taupiqur Rahman Chudory" img={wt} />
+                    <Candidate terpilih={values.memilih} norut="2" name="Mu`tazamullah Al Faris" img={mutazam} />
+                    <Candidate terpilih={values.memilih} norut="3" name="M. Fathan Zaki Mubarok" img={barok} />
+                    <Candidate terpilih={values.memilih} norut="4" name="Muhammad Hafiz" img={piscool} />
+                    <Candidate terpilih={values.memilih} norut="5" name="Muhammad Fathin Fadhlullah A" img={bacol} />
+                  </div>
+                  <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <div className="spinner-border spinner-border-sm align-items-center" role="status">
+                        <span className="sr-only">Loading...</span>
+                      </div>) : "Simpan permanen"}
+                  </button>
+                </div>
+                {this.state.successSubmitted ? (
+                  <div className="alert alert-success" role="alert">
+                    Selamat! Anda telah menggunakan hak pilih anda. Tunggu kelanjutannya di <a href="https://instagram.com/reunitez_/">Instagram Angkatan</a>
+                  </div>) : ""
+                }
+                {this.state.alreadySubmitted ? (
+                  <div className="alert alert-danger" role="alert">
+                  Anda sudah menggunakan hak pilih anda. Tunggu kelanjutannya di <a href="https://instagram.com/reunitez_/">Instagram Angkatan</a>
+                </div>
+                ) : ""}
+              </Card>
+            </Form>)}
+        </Formik>
+      </>
+    )
+  }
+}
 
 export default Pemilu

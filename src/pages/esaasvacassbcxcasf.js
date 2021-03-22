@@ -44,11 +44,15 @@ class Hasil extends React.Component {
 
     render() {
         return (
-            <>
-                {this.state.data.map(datum => (
-                    <li>{Object.keys(datum)[0]} {Object.values(datum)[0]}</li>
-                ))}
-            </>
+            <table className="table">
+                <tbody>
+                    {this.state.data.map(datum => (
+                        <tr>
+                            <td>{Object.keys(datum)[0]}</td><td>{Object.values(datum)[0]}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         )
     }
 }

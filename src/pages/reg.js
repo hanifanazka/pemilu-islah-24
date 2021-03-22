@@ -17,8 +17,8 @@ const Daftar = () => (
             <label>Email</label>
             <div className="input-group">
                 <input type="email" className="form-control" />
-                <span class="input-group-append">
-                    <span class="input-group-text">@</span>
+                <span className="input-group-append">
+                    <span className="input-group-text">@</span>
                 </span>
             </div>
         </div>
