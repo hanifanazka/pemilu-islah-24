@@ -89,7 +89,8 @@ class Pemilu extends React.Component {
             const myInit = { body: data };
             API.get(apiName, path + "/" + data.pemilih, myInit)
               .then(response => {
-                if (!response) {
+                console.log(response)
+                if (!response?.length) {
                   API.post(apiName, path, myInit)
                     .then(response => {
                       console.log(response)
