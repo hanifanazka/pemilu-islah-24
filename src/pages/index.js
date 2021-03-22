@@ -35,7 +35,7 @@ class Candidate extends React.Component {
       <div className="col-lg-4 col-sm-6">
         <div className={this.props.terpilih === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
           <div className="card-header h3 font-weight-bold text-center">{this.props.norut}</div>
-          <img src={this.props.img} />
+          <img className="img-fluid" src={this.props.img} />
           <div className="card-body">
             <div className="form-check">
               <Field type="radio" name="memilih" value={this.props.name} className="form-check-input" />
