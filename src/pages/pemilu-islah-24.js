@@ -8,6 +8,7 @@ import awsconfig from '../data/aws-exports'
 import SEO from "../components/seo"
 import { groupedOptions } from "../data/santri"
 import signUp from "../functions/signup"
+import { SelectField } from "../components/selectfield"
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -32,11 +33,11 @@ class Candidate extends React.Component {
   render() {
     return (
       <div className="col-lg-4 col-sm-6">
-        <div className={this.props.picked === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
-          <img className="card-img-top" src={this.props.img}/>
+        <div className={this.props.memilih === this.props.name ? "card mb-3 bg-light border-primary" : "card mb-3"}>
+          <img className="card-img-top" src={this.props.img} />
           <div className="card-body">
             <div className="form-check">
-              <Field type="radio" name="picked" value={this.props.name} className="form-check-input" />
+              <Field type="radio" name="memilih" value={this.props.name} className="form-check-input" />
               <label className="form-check-label">{this.props.name}</label>
             </div >
           </div>
@@ -61,47 +62,56 @@ async function postData(data) {
   return await API.post(apiName, path, myInit);
 }
 
-const Yangdipilih = () => (
-  <>
-    <div className="form-group">
-      <p className="h4">Coblos Ketua Islah 24!</p>
-      <Formik
-        initialValues={{
-          picked: '',
-        }}
-        onSubmit={async (values) => {
-          postData({
-            pemilih: "Hisbu",
-            memilih: values.picked
-          })
-        }}
-      >
-        {({ values }) => (
-          <Form>
-            <div className="form-row">
-              <Candidate picked={values.picked} name="Wildan Taupiqur Rahman Chudory" img={wt}/>
-              <Candidate picked={values.picked} name="Mu`tazamullah Al Faris" img={mutazam}/>
-              <Candidate picked={values.picked} name="Muhammad Fathin Fadhlullah A" img={bacol}/>
-              <Candidate picked={values.picked} name="Muhammad Hafiz" img={piscool}/>
-              <Candidate picked={values.picked} name="M. Fathan Zaki Mubarok" img={barok}/>
-            </div>
-            <div>Picked: {values.picked}</div>
-            <button type="submit" className="btn btn-primary d-block">Simpan permanen</button>
-          </Form>)}
-      </Formik>
+const Card = ({ children }) => (
+  <div className="container py-3">
+    <div className="card">
+      <div className="card-body">
+        {children}
+      </div>
     </div>
-  </>
+  </div>
 )
 
 const Pemilu = () => (
   <>
-    <div className="container py-3">
-      <div className="card">
-        <div className="card-body">
-          <Yangdipilih />
-        </div>
-      </div>
-    </div>
+    <Formik
+      initialValues={{
+        memilih: '',
+        pemilih: ""
+      }}
+      onSubmit={(values) => {
+        postData({
+          pemilih: values.pemilih,
+          memilih: values.memilih
+        })
+      }}
+    >
+      {({ values, isSubmitting, handleChange, handleBlur }) => (
+        <Form>
+          <Card>
+            <div className="form-group">
+              <h5 className="card-title">Nama Lengkap</h5>
+              {/* <Select isSearchable={true} placeholder="🔍 Cari" name="pemilih" options={groupedOptions} onChange={handleChange} onBlur={handleBlur} value={values.pemilih} inputValue={values.pemilih} /> */}
+              <Field name="pemilih" component={SelectField} options={groupedOptions} />
+            </div>
+          </Card>
+          <Card>
+            <div className="form-group">
+              <h5 className="card-title">Coblos Ketua Islah 24!</h5>
+              <div className="form-row">
+                <Candidate picked={values.memilih} name="Wildan Taupiqur Rahman Chudory" img={wt} />
+                <Candidate picked={values.memilih} name="Mu`tazamullah Al Faris" img={mutazam} />
+                <Candidate picked={values.memilih} name="Muhammad Fathin Fadhlullah A" img={bacol} />
+                <Candidate picked={values.memilih} name="Muhammad Hafiz" img={piscool} />
+                <Candidate picked={values.memilih} name="M. Fathan Zaki Mubarok" img={barok} />
+              </div>
+              <div>Pemilih: {values.pemilih}</div>
+              <div>Picked: {values.memilih}</div>
+              <button type="submit" className="btn btn-primary d-block" disabled={isSubmitting}>Simpan permanen</button>
+            </div>
+          </Card>
+        </Form>)}
+    </Formik>
   </>
 )
 
