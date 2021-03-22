@@ -35,8 +35,9 @@ class Hasil extends React.Component {
 
     componentDidMount() {
         API
-            .get("api66db2874", "/coblos/Hisbu")
+            .get("api66db2874", "/coblos", {})
             .then(response => {
+                console.log(response)
                 this.setState({ data: response })
             })
             .catch(error => {
